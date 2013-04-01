@@ -45,7 +45,7 @@ If the build system is unable to find your GMP installation, please edit the pat
 Windows
 ----
 
-Cork uses C++11, so you will need the most recent compiler; Visual Studio 2012 or higher please.  You will also need to install the MPIR arithmetic library into your Visual Studio environment.
+Cork uses C++11, so you will need the most recent compiler; Visual Studio 2012 or higher please.  You will also need to install the MPIR (www.mpir.org, LGPL) arithmetic library into your Visual Studio environment.
 
 Once this is done, you can use the solution and project files in the /win/ subdirectory to build the demo program.  The solution/project is not currently configured to build a DLL.  Please bug me if this is an issue for you.
 

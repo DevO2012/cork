@@ -517,23 +517,28 @@ public:
         
         
         // clean up after triangulate...
-            // in free
-        free(in.pointlist);
-        free(in.pointmarkerlist);
-        free(in.segmentlist);
-        free(in.segmentmarkerlist);
-            // out free
-        free(out.pointlist);
-        //free(out.pointattributelist);
-        free(out.pointmarkerlist);
-        free(out.trianglelist);
-        //free(out.triangleattributelist);
-        //free(out.trianglearealist);
-        //free(out.neighborlist);
-        free(out.segmentlist);
-        free(out.segmentmarkerlist);
-        //free(out.edgelist);
-        //free(out.edgemarkerlist);
+
+        // in free
+        // need to use delete[] for memory allocated by new[], 
+        //even better would be to replace this by smart pointer...
+        if(in.pointlist){ delete[] in.pointlist; in.pointlist = nullptr; }
+        if(in.pointmarkerlist){ delete[] in.pointmarkerlist; in.pointmarkerlist = nullptr; }
+        if(in.segmentlist){ delete[] in.segmentlist; in.segmentlist = nullptr; }
+        if(in.segmentmarkerlist){ delete[] in.segmentmarkerlist; in.segmentmarkerlist = nullptr; }
+
+        // out free
+        //need to use trifree() for memory allocated by triangulate().
+        trifree(out.pointlist);
+        //trifree(out.pointattributelist);
+        trifree(out.pointmarkerlist);
+        trifree(out.trianglelist);
+        //trifree(out.triangleattributelist);
+        //trifree(out.trianglearealist);
+        //trifree(out.neighborlist);
+        trifree(out.segmentlist);
+        trifree(out.segmentmarkerlist);
+        //trifree(out.edgelist);
+        //trifree(out.edgemarkerlist);
     }
 
 private:

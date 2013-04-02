@@ -54,7 +54,6 @@ std::ostream &err();
         err()     << "ENSURE FAILED at " \
                   << __FILE__ << ", line #" << __LINE__ << ":\n" \
                   << "    " << #STATEMENT << std::endl; \
-        exit(1); \
     } \
 }
 #endif // ENSURE

@@ -318,9 +318,9 @@ public:
                         std::cout << iprob->vPos(ie->other_tri_key->verts[k])
                                   << std::endl;
                     std::cout << "degen count:"
-                              << Empty3d::degeneracy_count << std::endl;
+                              << iprob->m_degeneracy_count << std::endl;
                     std::cout << "exact count: "
-                              << Empty3d::exact_count << std::endl;
+                              << iprob->m_exact_count << std::endl;
                 }
                 ENSURE(vert); // bad if we can't find a common vertex
                 // then, find the corresponding OVptr, and connect
@@ -945,7 +945,7 @@ void Mesh<VertData,TriData>::IsctProblem::bvh_edge_tri(
 template<class VertData, class TriData>
 bool Mesh<VertData,TriData>::IsctProblem::tryToFindIntersections()
 {
-    Empty3d::degeneracy_count = 0;
+    m_degeneracy_count = 0;
     // Find all edge-triangle intersection points
     //for_edge_tri([&](Eptr eisct, Tptr tisct)->bool{
     bvh_edge_tri([&](Eptr eisct, Tptr tisct)->bool{
@@ -960,12 +960,12 @@ bool Mesh<VertData,TriData>::IsctProblem::tryToFindIntersections()
             getTprob(tri)->addBoundaryEndpoint(this, tisct, eisct, iv);
         }
       }
-      if(Empty3d::degeneracy_count > 0)
+      if(m_degeneracy_count > 0)
         return false; // break
       else
         return true; // continue
     });
-    if(Empty3d::degeneracy_count > 0) {
+    if(m_degeneracy_count > 0) {
         return false;   // restart / abort
     }
     
@@ -1001,7 +1001,7 @@ bool Mesh<VertData,TriData>::IsctProblem::tryToFindIntersections()
         if(!checkIsct(t.t0, t.t1, t.t2))    continue;
         
         // Abort if we encounter a degeneracy
-        if(Empty3d::degeneracy_count > 0)   break;
+        if(m_degeneracy_count > 0)   break;
         
         GluePt      glue                    = newGluePt();
                     glue->edge_tri_type     = false;
@@ -1012,7 +1012,7 @@ bool Mesh<VertData,TriData>::IsctProblem::tryToFindIntersections()
         getTprob(t.t1)->addInteriorPoint(this, t.t0, t.t2, glue);
         getTprob(t.t2)->addInteriorPoint(this, t.t0, t.t1, glue);
     }
-    if(Empty3d::degeneracy_count > 0) {
+    if(m_degeneracy_count > 0) {
         return false;   // restart / abort
     }
     
@@ -1085,20 +1085,20 @@ template<class VertData, class TriData>
 bool Mesh<VertData,TriData>::IsctProblem::hasIntersections()
 {
     bool foundIsct = false;
-    Empty3d::degeneracy_count = 0;
+    m_degeneracy_count = 0;
     // Find some edge-triangle intersection point...
     bvh_edge_tri([&](Eptr eisct, Tptr tisct)->bool{
       if(checkIsct(eisct,tisct)) {
         foundIsct = true;
         return false; // break;
       }
-      if(Empty3d::degeneracy_count > 0) {
+      if(m_degeneracy_count > 0) {
         return false; // break;
       }
       return true; // continue
     });
     
-    if(Empty3d::degeneracy_count > 0 || foundIsct) {
+    if(m_degeneracy_count > 0 || foundIsct) {
         return true;
     } else {
         return false;

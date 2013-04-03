@@ -23,6 +23,8 @@
 // |    of the GNU Lesser General Public License
 // |    along with Cork.  If not, see <http://www.gnu.org/licenses/>.
 // +-------------------------------------------------------------------------
+#	define _USE_MATH_DEFINES
+
 #include "empty3d.h"
 
 #include "ext4.h"
@@ -37,9 +39,9 @@
 namespace Empty3d {
 
 // externalized counters...
-int degeneracy_count = 0;
-int exact_count = 0;
-int callcount = 0;
+//! int degeneracy_count = 0;
+//! int exact_count = 0;
+//! int callcount = 0;
 
 using namespace Ext4;
 using namespace AbsExt4;
@@ -127,7 +129,7 @@ inline bool filterCheck(double val, double absval, double coeff) {
 
 bool isEmpty(const TriEdgeIn &input)
 {
-    callcount++;
+    //callcount++;
     
     Ext4_2 temp_e2;
     
@@ -277,8 +279,8 @@ int emptyFilter(const TriEdgeIn &input)
     else
         return -1; // i.e. false (the intersection is not empty)
 }
-
-bool exactFallback(const TriEdgeIn &input)
+// ----------------------------------------------------------------------------------------------------
+bool exactFallback(const TriEdgeIn &input, int &degeneracy_count)
 {
     // How many bits do we need for various intermediary values?
     // Here we label the amount with the relevant type (i.e. EXT2)
@@ -358,13 +360,13 @@ bool exactFallback(const TriEdgeIn &input)
     return false;
 }
 
-bool emptyExact(const TriEdgeIn &input)
+bool emptyExact(const TriEdgeIn &input, int &exact_count, int &degeneracy_count)
 {
-    callcount++;
+    //callcount++;
     int filter = emptyFilter(input);
     if(filter == 0) {
         exact_count++;
-        return exactFallback(input);
+        return exactFallback(input, degeneracy_count);
     }
     else
         return filter > 0;
@@ -419,7 +421,7 @@ Vec3d coordsExact(const TriEdgeIn &input)
 
 bool isEmpty(const TriTriTriIn &input)
 {
-    callcount++;
+    //callcount++;
     
     Ext4_2 temp_e2;
     
@@ -548,8 +550,8 @@ int emptyFilter(const TriTriTriIn &input)
     else
         return -1; // i.e. false (the intersection is not empty)
 }
-
-bool exactFallback(const TriTriTriIn &input)
+// ----------------------------------------------------------------------------------------------------
+bool exactFallback(const TriTriTriIn &input, int &degeneracy_count)
 {
     // How many bits do we need for various intermediary values?
     // Here we label the amount with the relevant type (i.e. EXT2)
@@ -615,13 +617,13 @@ bool exactFallback(const TriTriTriIn &input)
     return false;
 }
 
-bool emptyExact(const TriTriTriIn &input)
+bool emptyExact(const TriTriTriIn &input, int &exact_count, int &degeneracy_count)
 {
-    callcount++;
+    //callcount++;
     int filter = emptyFilter(input);
     if(filter == 0) {
         exact_count++;
-        return exactFallback(input);
+        return exactFallback(input, degeneracy_count);
     }
     else
         return filter > 0;

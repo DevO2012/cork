@@ -838,6 +838,9 @@ protected: // DATA
     IterPool<GenericTriType>    gtpool;
 private:
     std::vector<Vec3d>          quantized_coords;
+public:
+	mutable int m_exact_count;
+	mutable int m_degeneracy_count;
 private:
     inline void for_edge_tri(std::function<bool(Eptr e, Tptr t)>);
     inline void bvh_edge_tri(std::function<bool(Eptr e, Tptr t)>);
@@ -1170,7 +1173,7 @@ bool Mesh<VertData,TriData>::IsctProblem::checkIsct(Eptr e, Tptr t) const
     Empty3d::TriEdgeIn input;
     marshallArithmeticInput(input, e, t);
     //bool empty = Empty3d::isEmpty(input);
-    bool empty = Empty3d::emptyExact(input);
+    bool empty = Empty3d::emptyExact(input, m_exact_count, m_degeneracy_count);
     return !empty;
 }
 
@@ -1200,7 +1203,7 @@ bool Mesh<VertData,TriData>::IsctProblem::checkIsct(
     Empty3d::TriTriTriIn input;
     marshallArithmeticInput(input, t0, t1, t2);
     //bool empty = Empty3d::isEmpty(input);
-    bool empty = Empty3d::emptyExact(input);
+    bool empty = Empty3d::emptyExact(input, m_exact_count, m_degeneracy_count);
     return !empty;
 }
 

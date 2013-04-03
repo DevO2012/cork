@@ -33,14 +33,12 @@ struct TriIn
 {
     Vec3d p[3];
 };
-
 struct EdgeIn
 {
     Vec3d p[2];
 };
 
-
-
+// triangle edge
 struct TriEdgeIn
 {
     TriIn   tri;
@@ -48,25 +46,27 @@ struct TriEdgeIn
 };
 bool isEmpty(const TriEdgeIn &input);
 Vec3d coords(const TriEdgeIn &input);
-bool emptyExact(const TriEdgeIn &input);
+
+bool emptyExact(const TriEdgeIn &input, int &exact_count, int &degeneracy_count);
 Vec3d coordsExact(const TriEdgeIn &input);
 
+// 3 x triangles 
 struct TriTriTriIn
 {
     TriIn tri[3];
 };
 bool isEmpty(const TriTriTriIn &input);
 Vec3d coords(const TriTriTriIn &input);
-bool emptyExact(const TriTriTriIn &input);
+
+bool emptyExact(const TriTriTriIn &input, int &exact_count, int &degeneracy_count);
 Vec3d coordsExact(const TriTriTriIn &input);
 
-extern int degeneracy_count; // count degeneracies encountered
-extern int exact_count; // count of filter calls failed
-extern int callcount; // total call count
+//extern int degeneracy_count; // count degeneracies encountered
+//extern int exact_count; // count of filter calls failed
+//extern int callcount; // total call count
 
 /*
 // exact versions
-
 
 bool emptyExact(const Cell3d0 &c0,
                 const Complex3d2 &complex,
@@ -77,6 +77,7 @@ void cell3d0toPointExact(SmVector3 &point,
                          const Complex3d2 &complex,
                          const Metric3d2 &metric);
 */
+
 } // end namespace Empty3d
 
 

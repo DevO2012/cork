@@ -26,6 +26,7 @@
 #pragma once
 
 #include "vec.h"
+#include "quantization.h" 
 
 namespace Empty3d {
 
@@ -41,8 +42,12 @@ struct EdgeIn
 // triangle edge
 struct TriEdgeIn
 {
+    TriEdgeIn(const Quantizator &quantizator) : quantizator(quantizator) {}
+
     TriIn   tri;
     EdgeIn  edge;
+
+	const Quantizator	&quantizator; //todo
 };
 bool isEmpty(const TriEdgeIn &input);
 Vec3d coords(const TriEdgeIn &input);
@@ -53,7 +58,11 @@ Vec3d coordsExact(const TriEdgeIn &input);
 // 3 x triangles 
 struct TriTriTriIn
 {
+	TriTriTriIn(const Quantizator &quantizator) : quantizator(quantizator) {}
+
     TriIn tri[3];
+
+	const Quantizator	&quantizator; //todo
 };
 bool isEmpty(const TriTriTriIn &input);
 Vec3d coords(const TriTriTriIn &input);

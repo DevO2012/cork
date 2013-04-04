@@ -630,7 +630,7 @@ public:
         for(VertData &v : TopoCache::mesh->verts) {
             maxMag = std::max(maxMag, max(abs(v.pos)));
         }
-        Quantization::callibrate(maxMag);
+        m_quantizator.callibrate(maxMag);
         
         // and use vertex auxiliary data to store quantized vertex coordinates
         uint N = TopoCache::mesh->verts.size();
@@ -642,9 +642,9 @@ public:
 #else
             Vec3d raw = TopoCache::mesh->verts[v->ref].pos;
 #endif
-            quantized_coords[write].x = Quantization::quantize(raw.x);
-            quantized_coords[write].y = Quantization::quantize(raw.y);
-            quantized_coords[write].z = Quantization::quantize(raw.z);
+			quantized_coords[write].x = m_quantizator.quantize(raw.x);
+			quantized_coords[write].y = m_quantizator.quantize(raw.y);
+			quantized_coords[write].z = m_quantizator.quantize(raw.z);
             v->data = &(quantized_coords[write]);
             write++;
         });
@@ -841,6 +841,7 @@ private:
 public:
 	mutable int m_exact_count;
 	mutable int m_degeneracy_count;
+	Quantizator	m_quantizator;
 private:
     inline void for_edge_tri(std::function<bool(Eptr e, Tptr t)>);
     inline void bvh_edge_tri(std::function<bool(Eptr e, Tptr t)>);
@@ -1022,11 +1023,11 @@ bool Mesh<VertData,TriData>::IsctProblem::tryToFindIntersections()
 template<class VertData, class TriData>
 void Mesh<VertData,TriData>::IsctProblem::perturbPositions()
 {
-    const double EPSILON = 1.0e-5; // perturbation epsilon
+    const double epsilon = 1.0e-5; // perturbation epsilon
     for(Vec3d &coord : quantized_coords) {
-        Vec3d perturbation(Quantization::quantize(drand(-EPSILON, EPSILON)),
-                           Quantization::quantize(drand(-EPSILON, EPSILON)),
-                           Quantization::quantize(drand(-EPSILON, EPSILON)));
+		Vec3d perturbation(m_quantizator.quantize(drand(-epsilon, epsilon)),
+						   m_quantizator.quantize(drand(-epsilon, epsilon)),
+						   m_quantizator.quantize(drand(-epsilon, epsilon)));
         coord += perturbation;
     }
 }
@@ -1170,7 +1171,7 @@ bool Mesh<VertData,TriData>::IsctProblem::checkIsct(Eptr e, Tptr t) const
     if(hasCommonVert(e, t))
                 return      false;
     
-    Empty3d::TriEdgeIn input;
+    Empty3d::TriEdgeIn input(m_quantizator);
     marshallArithmeticInput(input, e, t);
     //bool empty = Empty3d::isEmpty(input);
     bool empty = Empty3d::emptyExact(input, m_exact_count, m_degeneracy_count);
@@ -1200,7 +1201,7 @@ bool Mesh<VertData,TriData>::IsctProblem::checkIsct(
                 return      false;
     }
     
-    Empty3d::TriTriTriIn input;
+    Empty3d::TriTriTriIn input(m_quantizator);
     marshallArithmeticInput(input, t0, t1, t2);
     //bool empty = Empty3d::isEmpty(input);
     bool empty = Empty3d::emptyExact(input, m_exact_count, m_degeneracy_count);
@@ -1210,7 +1211,7 @@ bool Mesh<VertData,TriData>::IsctProblem::checkIsct(
 template<class VertData, class TriData>
 Vec3d Mesh<VertData,TriData>::IsctProblem::computeCoords(Eptr e, Tptr t) const
 {
-    Empty3d::TriEdgeIn input;
+    Empty3d::TriEdgeIn input(m_quantizator);
     marshallArithmeticInput(input, e, t);
     Vec3d coords = Empty3d::coordsExact(input);
     return coords;
@@ -1220,7 +1221,7 @@ template<class VertData, class TriData>
 Vec3d Mesh<VertData,TriData>::IsctProblem::computeCoords(
     Tptr t0, Tptr t1, Tptr t2
 ) const {
-    Empty3d::TriTriTriIn input;
+    Empty3d::TriTriTriIn input(m_quantizator);
     marshallArithmeticInput(input, t0, t1, t2);
     Vec3d coords = Empty3d::coordsExact(input);
     return coords;

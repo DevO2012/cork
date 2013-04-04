@@ -25,6 +25,9 @@
 // +-------------------------------------------------------------------------
 #pragma once
 
+// Important:  this class uses static MemPool!
+// FIXME:  This pool does not give the memory back to you until the application will be closed !!!
+
 #include "prelude.h"
 #include "memPool.h"
 

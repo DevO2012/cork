@@ -23,7 +23,7 @@
 // |    of the GNU Lesser General Public License
 // |    along with Cork.  If not, see <http://www.gnu.org/licenses/>.
 // +-------------------------------------------------------------------------
-#	define _USE_MATH_DEFINES
+#    define _USE_MATH_DEFINES
 
 #include "empty3d.h"
 
@@ -32,16 +32,17 @@
 #include "fixext4.h"
 #include "gmpext4.h"
 
-#include "quantization.h"
+//#include "quantization.h"
+
 
 #include <cfloat>
 
 namespace Empty3d {
 
 // externalized counters...
-//! int degeneracy_count = 0;
-//! int exact_count = 0;
-//! int callcount = 0;
+// int degeneracy_count = 0;
+// int exact_count = 0;
+// int callcount = 0;
 
 using namespace Ext4;
 using namespace AbsExt4;
@@ -73,25 +74,25 @@ void toVec3d(Vec3d &out, const Ext4_1 &in)
     out.z = in.e2 / in.e3;
 }
 
-const static int IN_BITS = Quantization::BITS + 1; // +1 for sign bit
-
-void toFixExt(FixExt4_1<IN_BITS> &out, const Vec3d &in)
+const static int IN_BITS = Quantizator::BITS + 1; // +1 for sign bit
+// ----------------------------------------------------------------------------------------------------
+void toFixExt(FixExt4_1<IN_BITS> &out, const Vec3d &in,const Quantizator	&quantizator)
 {
-    out.e0 = BitInt<IN_BITS>::Rep(Quantization::quantize2int(in[0]));
-    out.e1 = BitInt<IN_BITS>::Rep(Quantization::quantize2int(in[1]));
-    out.e2 = BitInt<IN_BITS>::Rep(Quantization::quantize2int(in[2]));
+    out.e0 = BitInt<IN_BITS>::Rep(quantizator.quantize2int(in[0]));
+    out.e1 = BitInt<IN_BITS>::Rep(quantizator.quantize2int(in[1]));
+    out.e2 = BitInt<IN_BITS>::Rep(quantizator.quantize2int(in[2]));
     out.e3 = BitInt<IN_BITS>::Rep(1);
 }
-
-void toGmpExt(GmpExt4_1 &out, const Vec3d &in)
+// ----------------------------------------------------------------------------------------------------
+void toGmpExt(GmpExt4_1 &out, const Vec3d &in,const Quantizator	&quantizator)
 {
-    out.e0 = Quantization::quantize2int(in.x);
-    out.e1 = Quantization::quantize2int(in.y);
-    out.e2 = Quantization::quantize2int(in.z);
+    out.e0 = quantizator.quantize2int(in.x);
+    out.e1 = quantizator.quantize2int(in.y);
+    out.e2 = quantizator.quantize2int(in.z);
     out.e3 = 1;
 }
 
-void toVec3d(Vec3d &out, const GmpExt4_1 &in)
+void toVec3d(Vec3d &out, const GmpExt4_1 &in,const Quantizator	&quantizator)
 {
     Vec4d tmp;
     tmp.x = in.e0.get_d();
@@ -100,7 +101,7 @@ void toVec3d(Vec3d &out, const GmpExt4_1 &in)
     tmp.w = in.e3.get_d();
     tmp /= tmp.w;
     for(uint k=0; k<3; k++)
-        out.v[k] = Quantization::RESHRINK * tmp.v[k];
+        out.v[k] = quantizator.m_reshrink * tmp.v[k];
 }
 
 //template<int BITS>
@@ -297,9 +298,9 @@ bool exactFallback(const TriEdgeIn &input, int &degeneracy_count)
     FixExt4_1<IN_BITS>                  ep[2];
     FixExt4_1<IN_BITS>                  tp[3];
     for(uint i=0; i<2; i++)
-        toFixExt(ep[i], input.edge.p[i]);
+        toFixExt(ep[i], input.edge.p[i],input.quantizator);
     for(uint i=0; i<3; i++)
-        toFixExt(tp[i], input.tri.p[i]);
+        toFixExt(tp[i], input.tri.p[i],input.quantizator);
     
     // construct geometry
     FixExt4_2<LINE_BITS>                e;
@@ -389,9 +390,9 @@ Vec3d coordsExact(const TriEdgeIn &input)
     GmpExt4_1                           ep[2];
     GmpExt4_1                           tp[3];
     for(uint i=0; i<2; i++)
-        toGmpExt(ep[i], input.edge.p[i]);
+        toGmpExt(ep[i], input.edge.p[i], input.quantizator);
     for(uint i=0; i<3; i++)
-        toGmpExt(tp[i], input.tri.p[i]);
+        toGmpExt(tp[i], input.tri.p[i], input.quantizator);
     
     // construct geometry
     GmpExt4_2                           e;
@@ -407,7 +408,7 @@ Vec3d coordsExact(const TriEdgeIn &input)
     
     // convert to double
     Vec3d result;
-    toVec3d(result, pisct);
+    toVec3d(result, pisct, input.quantizator);
     //std::cout << result << std::endl;
     return result;
 }
@@ -568,7 +569,7 @@ bool exactFallback(const TriTriTriIn &input, int &degeneracy_count)
     FixExt4_3<EXT3_UP_BITS>             t[3];
     for(uint i=0; i<3; i++) {
         for(uint j=0; j<3; j++) {
-            toFixExt(p[i][j], input.tri[i].p[j]);
+            toFixExt(p[i][j], input.tri[i].p[j], input.quantizator);
         }
         FixExt4_2<EXT2_UP_BITS>         temp;
         join(temp, p[i][0], p[i][1]);
@@ -646,7 +647,7 @@ Vec3d coordsExact(const TriTriTriIn &input)
     GmpExt4_3                           t[3];
     for(uint i=0; i<3; i++) {
         for(uint j=0; j<3; j++) {
-            toGmpExt(p[i][j], input.tri[i].p[j]);
+            toGmpExt(p[i][j], input.tri[i].p[j], input.quantizator);
         }
         GmpExt4_2                       temp;
         join(temp, p[i][0], p[i][1]);
@@ -663,7 +664,7 @@ Vec3d coordsExact(const TriTriTriIn &input)
     
     // convert to double
     Vec3d result;
-    toVec3d(result, pisct);
+    toVec3d(result, pisct, input.quantizator);
     return result;
 }
 
